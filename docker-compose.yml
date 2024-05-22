@@ -6,7 +6,7 @@ services:
 
     image:
       stat_server:latest
-    container_name: stat_server
+    container_name: stat-server
 
     ports:
       - "9090:9090"
@@ -21,7 +21,7 @@ services:
 
   stats_service-db:
     image: postgres:15-alpine
-    container_name: stat_server-db
+    container_name: stat-server-db
     ports:
     - "6666:5432"
     environment:
