@@ -10,14 +10,13 @@ services:
 
     ports:
       - "9090:9090"
-      - "9091:9091"
 
     depends_on:
       - stats_service-db
     environment:
-    - STAT_URL_DB=jdbc:postgresql://state_server-db:5432/stat_db
-    - STAT_USERNAME_DB=asd
-    - STAT_PASSWORD_DB=123
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://state_server-db:5432/stat_db
+      - SPRING_DATASOURCE_USERNAME=asd
+      - SPRING_DATASOURCE_PASSWORD=123
 
 
   stats_service-db:
