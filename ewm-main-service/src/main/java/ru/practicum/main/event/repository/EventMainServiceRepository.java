@@ -30,14 +30,14 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e " +
             "FROM Event e " +
             "LEFT JOIN Request r ON e.id = r.event.id " +
-            "WHERE ((:text IS null) OR ((lower(e.annotation) LIKE concat('%', lower(:text), '%')) OR (lower(e.description) LIKE concat('%', lower(:text), '%')))) " +
+            "WHERE ((:text IS null) OR (lower(e.annotation) LIKE concat('%', lower(:text), '%') OR lower(e.description) LIKE concat('%', lower(:text), '%'))) " +
             "AND (e.category.id IN :categories OR :categories IS null) " +
             "AND (e.paid = :paid OR :paid IS null) " +
             "AND (e.eventDate > :rangeStart OR :rangeStart IS null) " +
             "AND (e.eventDate < :rangeEnd OR :rangeEnd IS null) " +
-            "AND (:onlyAvailable = false OR ((:onlyAvailable = true AND e.participantLimit > COUNT(r.id))) " +
-            "OR (e.participantLimit > 0)) " +
-            "GROUP BY e.id")
+            "AND (:onlyAvailable = false OR (e.participantLimit > COUNT(r) AND e.participantLimit > 0)) " +
+            "GROUP BY e.id " +
+            "ORDER BY :sort")
     List<Event> findAllEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
                               LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, Pageable pageable);
 
