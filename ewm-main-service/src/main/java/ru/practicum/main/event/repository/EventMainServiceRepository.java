@@ -33,10 +33,10 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
             "AND (e.category.id IN ?2 OR ?2 IS null) " +
             "AND (e.paid = ?3 OR ?3 IS null) " +
             "AND (e.eventDate > ?4 OR ?4 IS null) AND (e.eventDate < ?5 OR ?5 IS null) " +
-            "AND (?6 = false OR ((?6 = true AND e.participantLimit > (SELECT count(*) FROM ru.practicum.main.request.model.Request AS r WHERE e.id = r.event.id))) " +
-            "OR (e.participantLimit > 0 )) ")
+            "AND (?6 = false OR (?6 = true AND e.participantLimit > 0) OR " +
+            "(e.participantLimit > (SELECT count(r) FROM ru.practicum.main.request.model.Request r WHERE r.event.id = e.id)))")
     List<Event> findAllEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                              LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, Pageable pageable);
+                              LocalDateTime rangeEnd, Boolean onlyAvailable, Pageable pageable);
 
     boolean existsByCategoryId(long catId);
 }
