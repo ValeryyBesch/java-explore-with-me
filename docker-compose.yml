@@ -23,24 +23,24 @@ services:
     image: postgres:15-alpine
     container_name: stat-server-db
     ports:
-    - "6666:5432"
+      - "6666:5432"
     environment:
-    - POSTGRES_DB=stat_db
-    - POSTGRES_USER=asd
-    - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=stat_db
+      - POSTGRES_USER=asd
+      - POSTGRES_PASSWORD=123
 
 
   ewm-service:
     build: ./ewm-main-service
     image:
-     ewm-service:latest
+      ewm-service:latest
     container_name: ewm-service
 
     ports:
-     - "8080:8080"
+      - "8080:8080"
 
     depends_on:
-     - ewm-db
+      - ewm-db
     environment:
       - MAIN_DB=jdbc:postgresql://postgres-main-db:5432/ewm_db
       - MAIN_USER=postgres
@@ -50,7 +50,7 @@ services:
     image: postgres:15
     container_name: postgres-main-db
     ports:
-     - "6464:5432"
+      - "6464:5432"
     environment:
       - POSTGRES_DB=ewm_db
       - POSTGRES_USER=postgres
