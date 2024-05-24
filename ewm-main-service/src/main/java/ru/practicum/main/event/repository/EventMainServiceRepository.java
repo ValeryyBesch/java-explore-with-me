@@ -14,17 +14,16 @@ import java.util.Optional;
 public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByInitiatorId(long userId, Pageable pageable);
 
-
     Optional<Event> findByIdAndInitiatorId(long eventId, long userId);
 
     @Query("SELECT e " +
             "FROM Event e " +
-            "WHERE (e.initiator.id IN :users OR :users IS null) " +
+            "WHERE (e.initiator.id IN :userIds OR :userIds IS null) " +
             "AND (e.state IN :states OR :states IS null) " +
             "AND (e.category.id IN :categories OR :categories IS null) " +
             "AND (e.eventDate > :start OR :start IS null) " +
             "AND (e.eventDate < :end OR :end IS null) ")
-    List<Event> findAllByParam(@Param("users") List<Long> users,
+    List<Event> findAllByParam(@Param("userIds") List<Long> users,
                                @Param("states") List<State> states,
                                @Param("categories") List<Long> categories,
                                @Param("start") LocalDateTime start,
@@ -38,13 +37,14 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
             "WHERE ((:text IS null) OR ((lower(e.annotation) LIKE concat('%', lower(:text), '%')) OR (lower(e.description) LIKE concat('%', lower(:text), '%')))) " +
             "AND (e.category.id IN :categories OR :categories IS null) " +
             "AND (e.paid = :paid OR :paid IS null) " +
-            "AND (e.eventDate > :rangeStart OR :rangeStart IS null) AND (e.eventDate < :rangeEnd OR :rangeEnd IS null) " +
-            "AND (:onlyAvailable = false OR ((:onlyAvailable = true AND e.participantLimit > (SELECT count(*) FROM Request AS r WHERE e.id = r.event.id))) OR (e.participantLimit > 0))")
+            "AND (e.eventDate > :start OR :start IS null) AND (e.eventDate < :end OR :end IS null) " +
+            "AND (:onlyAvailable = false OR ((:onlyAvailable = true AND e.participantLimit > (SELECT count(*) FROM Request AS r WHERE e.id = r.event.id))) " +
+            "OR (e.participantLimit > 0 )) ")
     List<Event> findAllEvents(@Param("text") String text,
                               @Param("categories") List<Long> categories,
                               @Param("paid") Boolean paid,
-                              @Param("rangeStart") LocalDateTime rangeStart,
-                              @Param("rangeEnd") LocalDateTime rangeEnd,
+                              @Param("start") LocalDateTime rangeStart,
+                              @Param("end") LocalDateTime rangeEnd,
                               @Param("onlyAvailable") Boolean onlyAvailable,
                               @Param("sort") String sort,
                               Pageable pageable);
