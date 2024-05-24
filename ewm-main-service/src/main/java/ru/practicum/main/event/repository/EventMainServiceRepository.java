@@ -22,7 +22,7 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
             "AND (e.state IN :states OR :states IS null) " +
             "AND (e.category.id IN :categories OR :categories IS null) " +
             "AND (e.eventDate > :start OR :start IS null) " +
-            "AND (e.eventDate < :end OR :end IS null)")
+            "AND (e.eventDate < :end OR :end IS null) ")
     List<Event> findAllByParam(@Param("users") List<Long> users,
                                @Param("states") List<State> states,
                                @Param("categories") List<Long> categories,
@@ -35,7 +35,7 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e " +
             "FROM Event e " +
             "LEFT JOIN Request r ON e.id = r.event.id " +
-            "WHERE ((:text IS null) OR ((lower(e.annotation) LIKE concat('%', lower(:text), '%')) OR (lower(e.description) LIKE concat('%', lower(:text), '%')))) " +
+            "WHERE ((:text IS null) OR (lower(e.annotation) LIKE concat('%', lower(:text), '%') OR lower(e.description) LIKE concat('%', lower(:text), '%'))) " +
             "AND (e.category.id IN :categories OR :categories IS null) " +
             "AND (e.paid = :paid OR :paid IS null) " +
             "AND (e.eventDate > :rangeStart OR :rangeStart IS null) " +
