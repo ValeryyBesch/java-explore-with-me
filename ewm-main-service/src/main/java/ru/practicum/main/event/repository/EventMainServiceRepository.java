@@ -18,11 +18,11 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e " +
             "FROM Event e " +
-            "WHERE (e.initiator.id IN :users OR :users IS null) " +
-            "AND (e.state IN :states OR :states IS null) " +
-            "AND (e.category.id IN :categories OR :categories IS null) " +
-            "AND (e.eventDate > :start OR :start IS null) " +
-            "AND (e.eventDate < :end OR :end IS null) ")
+            "WHERE (e.initiator.id IN :users OR :users IS NULL) " +
+            "AND (e.state IN :states OR :states IS NULL) " +
+            "AND (e.category.id IN :categories OR :categories IS NULL) " +
+            "AND (e.eventDate > :start OR :start IS NULL) " +
+            "AND (e.eventDate < :end OR :end IS NULL)")
     List<Event> findAllByParam(@Param("users") List<Long> users,
                                @Param("states") List<State> states,
                                @Param("categories") List<Long> categories,
@@ -34,13 +34,12 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e " +
             "FROM Event e " +
-            "LEFT JOIN Request r ON e.id = r.event.id " +
-            "WHERE ((:text IS null) OR (lower(e.annotation) LIKE concat('%', lower(:text), '%') OR lower(e.description) LIKE concat('%', lower(:text), '%'))) " +
-            "AND (e.category.id IN :categories OR :categories IS null) " +
-            "AND (e.paid = :paid OR :paid IS null) " +
-            "AND (e.eventDate > :rangeStart OR :rangeStart IS null) " +
-            "AND (e.eventDate < :rangeEnd OR :rangeEnd IS null) " +
-            "AND (:onlyAvailable = false OR (e.participantLimit > COUNT(r) AND e.participantLimit > 0)) " +
+            "WHERE (:text IS NULL OR (LOWER(e.annotation) LIKE CONCAT('%', LOWER(:text), '%') OR LOWER(e.description) LIKE CONCAT('%', LOWER(:text), '%'))) " +
+            "AND (e.category.id IN :categories OR :categories IS NULL) " +
+            "AND (e.paid = :paid OR :paid IS NULL) " +
+            "AND (e.eventDate > :rangeStart OR :rangeStart IS NULL) " +
+            "AND (e.eventDate < :rangeEnd OR :rangeEnd IS NULL) " +
+            "AND (:onlyAvailable = false OR (e.participantLimit > (SELECT COUNT(r) FROM Request AS r WHERE e.id = r.event.id AND e.participantLimit > 0))) " +
             "GROUP BY e.id " +
             "ORDER BY :sort")
     List<Event> findAllEvents(@Param("text") String text,
