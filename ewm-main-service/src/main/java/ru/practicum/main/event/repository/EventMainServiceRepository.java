@@ -3,6 +3,7 @@ package ru.practicum.main.event.repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.main.event.status.State;
 import ru.practicum.main.event.model.Event;
 
@@ -21,16 +22,20 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
             "AND (e.state IN :states OR :states IS null) " +
             "AND (e.category.id IN :categories OR :categories IS null) " +
             "AND (e.eventDate > :start OR :start IS null) " +
-            "AND (e.eventDate < :end OR :end IS null) ")
-    List<Event> findAllByParam(List<Long> users, List<State> states, List<Long> categories,
-                               LocalDateTime start, LocalDateTime end, Pageable pageable);
+            "AND (e.eventDate < :end OR :end IS null)")
+    List<Event> findAllByParam(@Param("users") List<Long> users,
+                               @Param("states") List<State> states,
+                               @Param("categories") List<Long> categories,
+                               @Param("start") LocalDateTime start,
+                               @Param("end") LocalDateTime end,
+                               Pageable pageable);
 
     boolean existsByIdAndInitiatorId(long eventId, long userId);
 
     @Query("SELECT e " +
             "FROM Event e " +
             "LEFT JOIN Request r ON e.id = r.event.id " +
-            "WHERE ((:text IS null) OR (lower(e.annotation) LIKE concat('%', lower(:text), '%') OR lower(e.description) LIKE concat('%', lower(:text), '%'))) " +
+            "WHERE ((:text IS null) OR ((lower(e.annotation) LIKE concat('%', lower(:text), '%')) OR (lower(e.description) LIKE concat('%', lower(:text), '%')))) " +
             "AND (e.category.id IN :categories OR :categories IS null) " +
             "AND (e.paid = :paid OR :paid IS null) " +
             "AND (e.eventDate > :rangeStart OR :rangeStart IS null) " +
@@ -38,8 +43,14 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
             "AND (:onlyAvailable = false OR (e.participantLimit > COUNT(r) AND e.participantLimit > 0)) " +
             "GROUP BY e.id " +
             "ORDER BY :sort")
-    List<Event> findAllEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                              LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, Pageable pageable);
+    List<Event> findAllEvents(@Param("text") String text,
+                              @Param("categories") List<Long> categories,
+                              @Param("paid") Boolean paid,
+                              @Param("rangeStart") LocalDateTime rangeStart,
+                              @Param("rangeEnd") LocalDateTime rangeEnd,
+                              @Param("onlyAvailable") Boolean onlyAvailable,
+                              @Param("sort") String sort,
+                              Pageable pageable);
 
     boolean existsByCategoryId(long catId);
 }
