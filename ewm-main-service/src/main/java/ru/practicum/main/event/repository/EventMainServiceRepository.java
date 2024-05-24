@@ -3,6 +3,7 @@ package ru.practicum.main.event.repository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.main.event.status.State;
 import ru.practicum.main.event.model.Event;
 
@@ -16,27 +17,37 @@ public interface EventMainServiceRepository extends JpaRepository<Event, Long> {
     Optional<Event> findByIdAndInitiatorId(long eventId, long userId);
 
     @Query("SELECT e " +
-            "FROM ru.practicum.main.event.model.Event e " +
-            "WHERE (e.initiator.id IN ?1 OR ?1 IS null) " +
-            "AND (e.state IN ?2 OR ?2 IS null) " +
-            "AND (e.category.id IN ?3 OR ?3 IS null) " +
-            "AND (e.eventDate > ?4 OR ?4 IS null) " +
-            "AND (e.eventDate < ?5 OR ?5 IS null) ")
-    List<Event> findAllByParam(List<Long> users, List<State> states, List<Long> categories,
-                               LocalDateTime start, LocalDateTime end, Pageable pageable);
+            "FROM Event e " +
+            "WHERE (e.initiator.id IN :userIds OR :userIds IS null) " +
+            "AND (e.state IN :states OR :states IS null) " +
+            "AND (e.category.id IN :categories OR :categories IS null) " +
+            "AND (e.eventDate > :start OR :start IS null) " +
+            "AND (e.eventDate < :end OR :end IS null) ")
+    List<Event> findAllByParam(@Param("userIds") List<Long> userIds,
+                               @Param("states") List<State> states,
+                               @Param("categories") List<Long> categories,
+                               @Param("start") LocalDateTime start,
+                               @Param("end") LocalDateTime end,
+                               Pageable pageable);
 
     boolean existsByIdAndInitiatorId(long eventId, long userId);
 
     @Query("SELECT e " +
-            "FROM ru.practicum.main.event.model.Event e " +
-            "WHERE ((?1 IS null) OR ((lower(e.annotation) LIKE concat('%', lower(?1), '%')) OR (lower(e.description) LIKE concat('%', lower(?1), '%')))) " +
-            "AND (e.category.id IN ?2 OR ?2 IS null) " +
-            "AND (e.paid = ?3 OR ?3 IS null) " +
-            "AND (e.eventDate > ?4 OR ?4 IS null) AND (e.eventDate < ?5 OR ?5 IS null) " +
-            "AND (?6 = false OR (?6 = true AND e.participantLimit > 0) OR " +
-            "(e.participantLimit > (SELECT count(r) FROM ru.practicum.main.request.model.Request r WHERE r.event.id = e.id)))")
-    List<Event> findAllEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                              LocalDateTime rangeEnd, Boolean onlyAvailable, Pageable pageable);
+            "FROM Event e " +
+            "WHERE ((:text IS null) OR ((lower(e.annotation) LIKE concat('%', lower(:text), '%')) OR (lower(e.description) LIKE concat('%', lower(:text), '%')))) " +
+            "AND (e.category.id IN :categories OR :categories IS null) " +
+            "AND (e.paid = :paid OR :paid IS null) " +
+            "AND (e.eventDate > :rangeStart OR :rangeStart IS null) AND (e.eventDate < :rangeEnd OR :rangeEnd IS null) " +
+            "AND (:onlyAvailable = false OR ((:onlyAvailable = true AND e.participantLimit > (SELECT count(*) FROM Request AS r WHERE e.id = r.event.id))) " +
+            "OR (e.participantLimit > 0 )) ")
+    List<Event> findAllEvents(@Param("text") String text,
+                              @Param("categories") List<Long> categories,
+                              @Param("paid") Boolean paid,
+                              @Param("rangeStart") LocalDateTime rangeStart,
+                              @Param("rangeEnd") LocalDateTime rangeEnd,
+                              @Param("onlyAvailable") Boolean onlyAvailable,
+                              String sort,
+                              Pageable pageable);
 
     boolean existsByCategoryId(long catId);
 }
