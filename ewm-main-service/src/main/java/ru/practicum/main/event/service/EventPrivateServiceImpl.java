@@ -217,13 +217,11 @@ public class EventPrivateServiceImpl implements EventPrivateService {
     @Override
     public RequestShortUpdateDto updateRequestByOwner(Long userId, Long eventId, ru.practicum.main.event.dto.RequestShortDto requestShortDto) {
         log.info("updateRequestByOwner - invoked");
-
         RequestShortDto requestShort = RequestMapper.toRequestShort(requestShortDto);
         if (!userMainServiceRepository.existsById(userId)) {
             log.error("User with id = {} not exists", userId);
             throw new NotFoundException("User not found");
         }
-
         Event event = repository.findById(eventId).orElseThrow(() -> {
             log.error("Event with id = {} not exist", eventId);
             return new NotFoundException("Event not found");
@@ -242,23 +240,26 @@ public class EventPrivateServiceImpl implements EventPrivateService {
         }
 
         RequestUpdateDto updateRequest = new RequestUpdateDto();
-        List<Long> requestIds = requestShort.getRequestIds();
-        List<Request> requests = requestMainServiceRepository.findAllById(requestIds);
 
-        for (Request request : requests) {
+        requestShort.getRequestIds().forEach(requestId -> {
+
+            Request request = requestMainServiceRepository.findById(requestId).orElseThrow(() -> {
+                log.error("Request with id = {} not exist", requestId);
+                return new NotFoundException("Request not found");
+            });
+
             if (requestShort.getStatus().equals(Status.CONFIRMED)) {
                 request.setStatus(Status.CONFIRMED);
                 updateRequest.getConformedRequest().add(request);
-            } else if (requestShort.getStatus().equals(Status.REJECTED)) {
+            }
+            if (requestShort.getStatus().equals(Status.REJECTED)) {
                 request.setStatus(Status.REJECTED);
                 updateRequest.getCanselRequest().add(request);
             }
-        }
-
+        });
         log.info("Result: request {} - updated", updateRequest);
         return RequestMapper.toRequestShortUpdateDto(updateRequest);
     }
-
 
     private Optional<Location> getLocation(Location location) {
         log.info("getLocation - invoked");
