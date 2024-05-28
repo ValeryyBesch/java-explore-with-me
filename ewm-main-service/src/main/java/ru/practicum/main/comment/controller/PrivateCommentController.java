@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.comment.dto.CommentDto;
 import ru.practicum.main.comment.dto.CommentCreateDto;
 import ru.practicum.main.comment.service.PrivateCommentService;
 
+import javax.validation.Valid;
+
 @RestController
-@Validated
 @RequiredArgsConstructor
 @Slf4j
 public class PrivateCommentController {
@@ -21,7 +21,7 @@ public class PrivateCommentController {
     @PostMapping("/users/{userId}/events/{eventId}/comment")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<CommentDto> create(@PathVariable Long userId, @PathVariable Long eventId,
-                                             @RequestBody @Validated CommentCreateDto commentCreateDto) {
+                                             @RequestBody @Valid CommentCreateDto commentCreateDto) {
         log.info("Calling the GET request to /users/{userId}/events/{eventId}/comment endpoint");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.createComment(userId, eventId, commentCreateDto));
@@ -39,7 +39,7 @@ public class PrivateCommentController {
 
     @PatchMapping("/users/{userId}/comment/{comId}")
     public ResponseEntity<CommentDto> patch(@PathVariable Long userId, @PathVariable Long comId,
-                                            @RequestBody @Validated CommentCreateDto commentCreateDto) {
+                                            @RequestBody @Valid CommentCreateDto commentCreateDto) {
         log.info("Calling the PATCH request to users/{userId}/comment/{comId} endpoint");
         return ResponseEntity.ok(service.patchComment(userId, comId, commentCreateDto));
     }
